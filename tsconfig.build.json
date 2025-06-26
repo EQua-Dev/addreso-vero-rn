@@ -1,0 +1,14 @@
+// tsconfig.build.json
+{
+  "extends": "./tsconfig", // This extends your main tsconfig.json
+  "compilerOptions": {
+    "outDir": "./lib/typescript/src", // Crucial: This tells TSC where to put the .d.ts files
+    "declaration": true, // Crucial: Tells TSC to generate .d.ts files
+    "emitDeclarationOnly": true, // Crucial: Tells TSC *only* to generate .d.ts files, not JS
+    "noEmit": false, // Crucial: Overrides noEmit: true from base tsconfig
+    "jsx": "react", // Ensure JSX is handled if you have .tsx files
+    "rootDir": "src" // Explicitly set root directory for source files
+  },
+  "include": ["src/**/*"], // Only include source files for this build
+  "exclude": ["node_modules", "lib", "example"] // Exclude example folder and generated lib
+}
