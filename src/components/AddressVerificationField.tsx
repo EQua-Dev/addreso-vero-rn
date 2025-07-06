@@ -9,11 +9,19 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import type { AddressVerificationFieldProps, GooglePlacesPrediction, AddressResult } from '../types';
+import type {
+  AddressVerificationFieldProps,
+  GooglePlacesPrediction,
+  AddressResult,
+} from '../types';
 import { ApiService } from '../services/ApiService';
 import { LocationService } from '../services/LocationService';
 import { requestLocationPermission } from '../utils/permissions';
-import { debounce, generateSessionToken, GOOGLE_PLACES_KEY } from '../utils/helper_functions';
+import {
+  debounce,
+  generateSessionToken,
+  GOOGLE_PLACES_KEY,
+} from '../utils/helper_functions';
 import GooglePlacesService from '../services/GooglePlacesService';
 
 const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
@@ -21,6 +29,9 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
   onAddressSelected,
   onLocationUpdate,
   onError,
+  chooseAddressType,
+  addressTypes,
+  onAddressTypeChange,
   placeholder = 'Enter your address',
   showSubmitButton = true,
   style,
@@ -28,13 +39,18 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
 }) => {
   const [query, setQuery] = useState(config.initialAddressText || '');
   const [suggestions, setSuggestions] = useState<GooglePlacesPrediction[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<AddressResult | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<AddressResult | null>(
+    null
+  );
+  const [selectedType, setSelectedType] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [pollingInterval, setPollingInterval] = useState<number>(15);
   const [sessionTimeout, setSessionTimeout] = useState<number>(60);
   const [sessionToken] = useState(() => generateSessionToken());
-  const [googlePlacesService] = useState(() => new GooglePlacesService(GOOGLE_PLACES_KEY || ''));
+  const [googlePlacesService] = useState(
+    () => new GooglePlacesService(GOOGLE_PLACES_KEY || '')
+  );
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -42,7 +58,11 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
       if (searchQuery.trim().length > 2) {
         setLoadingSuggestions(true);
         try {
-          const predictions = await googlePlacesService.getAutocompletePredictions(searchQuery, sessionToken);
+          const predictions =
+            await googlePlacesService.getAutocompletePredictions(
+              searchQuery,
+              sessionToken
+            );
           setSuggestions(predictions);
         } catch (error) {
           console.error('Error fetching suggestions:', error);
@@ -68,11 +88,11 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
         // }
 
         ApiService.getInstance().configure(config.apiKey, config.customerID);
-        
-        const configData = await ApiService.getInstance().fetchAddressVerificationConfig();
+
+        const configData =
+          await ApiService.getInstance().fetchAddressVerificationConfig();
         setPollingInterval(configData.geotaggingPollingInterval || 15);
         setSessionTimeout(configData.geotaggingSessionTimeout || 60);
-        
       } catch (error) {
         console.error('Error initializing service:', error);
         onError?.(`Failed to initialize: ${error}`);
@@ -93,8 +113,11 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
     async (suggestion: GooglePlacesPrediction) => {
       try {
         setLoadingSuggestions(true);
-        const placeDetails = await googlePlacesService.getPlaceDetails(suggestion.place_id, sessionToken);
-        
+        const placeDetails = await googlePlacesService.getPlaceDetails(
+          suggestion.place_id,
+          sessionToken
+        );
+
         setSelectedAddress(placeDetails);
         setQuery(placeDetails.address);
         setSuggestions([]);
@@ -102,7 +125,10 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
       } catch (error) {
         console.error('Error selecting address:', error);
         onError?.(`Failed to select address: ${error}`);
-        Alert.alert('Error', 'Failed to get address details. Please try again.');
+        Alert.alert(
+          'Error',
+          'Failed to get address details. Please try again.'
+        );
       } finally {
         setLoadingSuggestions(false);
       }
@@ -120,7 +146,10 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
       try {
         const permissionResult = await requestLocationPermission();
         if (!permissionResult.granted) {
-          Alert.alert('Permission Required', 'Location permission is required for address verification');
+          Alert.alert(
+            'Permission Required',
+            'Location permission is required for address verification'
+          );
           return;
         }
 
@@ -132,7 +161,10 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
           onLocationUpdate
         );
 
-        Alert.alert('Success', 'Address verification started. Location tracking is now active.');
+        Alert.alert(
+          'Success',
+          'Address verification started. Location tracking is now active.'
+        );
       } catch (error) {
         console.error('Error starting location verification:', error);
         onError?.(`Failed to start location verification: ${error}`);
@@ -140,7 +172,14 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
     } else {
       Alert.alert('Success', 'Address selected successfully');
     }
-  }, [selectedAddress, config, pollingInterval, sessionTimeout, onLocationUpdate, onError]);
+  }, [
+    selectedAddress,
+    config,
+    pollingInterval,
+    sessionTimeout,
+    onLocationUpdate,
+    onError,
+  ]);
 
   const handleClearAddress = useCallback(() => {
     setSelectedAddress(null);
@@ -160,6 +199,33 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
   return (
     <View style={[styles.container, style]}>
       <View style={styles.inputContainer}>
+        {chooseAddressType && addressTypes?.length! > 0 && (
+          <View style={styles.addressTypeContainer}>
+            {addressTypes!.map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={[
+                  styles.addressTypeButton,
+                  selectedType === type && styles.addressTypeButtonSelected,
+                ]}
+                onPress={() => {
+                  setSelectedType(type);
+                  onAddressTypeChange?.(type);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.addressTypeText,
+                    selectedType === type && styles.addressTypeTextSelected,
+                  ]}
+                >
+                  {type}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
         <TextInput
           style={styles.textInput}
           value={query}
@@ -170,7 +236,10 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
           autoCorrect={false}
         />
         {selectedAddress && (
-          <TouchableOpacity style={styles.clearButton} onPress={handleClearAddress}>
+          <TouchableOpacity
+            style={styles.clearButton}
+            onPress={handleClearAddress}
+          >
             <Text style={styles.clearButtonText}>✕</Text>
           </TouchableOpacity>
         )}
@@ -191,8 +260,12 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
               style={styles.suggestionItem}
               onPress={() => handleSuggestionSelect(item)}
             >
-              <Text style={styles.suggestionMain}>{item.structured_formatting.main_text}</Text>
-              <Text style={styles.suggestionSecondary}>{item.structured_formatting.secondary_text}</Text>
+              <Text style={styles.suggestionMain}>
+                {item.structured_formatting.main_text}
+              </Text>
+              <Text style={styles.suggestionSecondary}>
+                {item.structured_formatting.secondary_text}
+              </Text>
             </TouchableOpacity>
           )}
           style={styles.suggestionsList}
@@ -203,7 +276,10 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
 
       {showSubmitButton && (
         <TouchableOpacity
-          style={[styles.submitButton, !selectedAddress && styles.submitButtonDisabled]}
+          style={[
+            styles.submitButton,
+            !selectedAddress && styles.submitButtonDisabled,
+          ]}
           onPress={handleSubmit}
           disabled={!selectedAddress}
         >
@@ -216,9 +292,12 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
       {selectedAddress && (
         <View style={styles.selectedAddressContainer}>
           <Text style={styles.selectedAddressLabel}>Selected Address:</Text>
-          <Text style={styles.selectedAddressText}>{selectedAddress.address}</Text>
+          <Text style={styles.selectedAddressText}>
+            {selectedAddress.address}
+          </Text>
           <Text style={styles.coordinatesText}>
-            Coordinates: {selectedAddress.latitude.toFixed(6)}, {selectedAddress.longitude.toFixed(6)}
+            Coordinates: {selectedAddress.latitude.toFixed(6)},{' '}
+            {selectedAddress.longitude.toFixed(6)}
           </Text>
         </View>
       )}
@@ -285,6 +364,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
+  },
+  addressTypeContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 12,
+    gap: 8,
+  },
+  addressTypeButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#f0f0f0',
+  },
+  addressTypeButtonSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  addressTypeText: {
+    color: '#333',
+    fontSize: 14,
+  },
+  addressTypeTextSelected: {
+    color: '#fff',
+    fontWeight: '600',
   },
   suggestionSecondary: {
     fontSize: 14,
