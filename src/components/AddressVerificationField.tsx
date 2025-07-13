@@ -63,7 +63,17 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
               searchQuery,
               sessionToken
             );
-          setSuggestions(predictions);
+          console.log('predictions', predictions);
+
+          if (Array.isArray(predictions)) {
+            setSuggestions(predictions);
+          } else {
+            console.warn(
+              'GooglePlacesService returned non-array predictions:',
+              predictions
+            );
+            setSuggestions([]); // fallback to empty
+          }
         } catch (error) {
           console.error('Error fetching suggestions:', error);
           onError?.(`Failed to fetch suggestions: ${error}`);

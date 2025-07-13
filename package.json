@@ -1,6 +1,6 @@
 {
   "name": "sid-address-verification-react-native",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "A sourceID react native package for address verification",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
