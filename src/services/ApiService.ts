@@ -1,4 +1,8 @@
-import type { GooglePlacesResponse, GooglePlaceDetails, LocationPoint } from '../types';
+import type {
+  GooglePlacesResponse,
+  GooglePlaceDetails,
+  LocationPoint,
+} from '../types';
 
 export class ApiService {
   private static instance: ApiService;
@@ -21,6 +25,7 @@ export class ApiService {
 
   // Fetch address verification config
   public async fetchAddressVerificationConfig(): Promise<{
+    distanceTolerance: number;
     geotaggingPollingInterval: number;
     geotaggingSessionTimeout: number;
   }> {
@@ -105,7 +110,9 @@ export class ApiService {
   }
 
   // Submit location for verification
-  public async submitLocationForVerification(location: LocationPoint): Promise<void> {
+  public async submitLocationForVerification(
+    location: LocationPoint
+  ): Promise<void> {
     try {
       const payload = {
         country: 'United States',
@@ -124,7 +131,7 @@ export class ApiService {
       };
 
       const response = await fetch(
-        'https://api.rd.usesourceid.com/v1/api/verification/verify-address',
+        'https://api.rd.usesourceid.com/v1/api/verification/address',
         {
           method: 'POST',
           headers: {
