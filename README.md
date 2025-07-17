@@ -1,18 +1,18 @@
-# sid-address-verification-react-native
+# addreso-vero-rn
 
-A sourceID react native package for address verification
+A simple (not actually simple) react native package
 
 ## Installation
 
 ```sh
-npm install sid-address-verification-react-native
+npm install addreso-vero-rn
 ```
 
 ## Usage
 
 
 ```js
-import { multiply } from 'sid-address-verification-react-native';
+import { multiply } from 'addreso-vero-rn';
 
 // ...
 
@@ -31,4 +31,4 @@ MIT
 ---
 
 Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
-# sid-address-verification-react-native
+# addreso-vero-rn
