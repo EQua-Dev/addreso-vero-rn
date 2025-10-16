@@ -1,50 +1,46 @@
 import { Platform, PermissionsAndroid } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 export const requestLocationPermission = async () => {
-  try {
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Permission',
-          message:
-            'This app needs access to location for address verification.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
+    try {
+        if (Platform.OS === 'android') {
+            const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+                title: 'Location Permission',
+                message: 'This app needs access to location for address verification.',
+                buttonNeutral: 'Ask Me Later',
+                buttonNegative: 'Cancel',
+                buttonPositive: 'OK',
+            });
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                return { granted: true };
+            }
+            else {
+                return { granted: false, error: 'Location permission denied' };
+            }
         }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        return { granted: true };
-      } else {
-        return { granted: false, error: 'Location permission denied' };
-      }
-    } else {
-      // iOS - request permission through Geolocation
-      return new Promise((resolve) => {
-        Geolocation.requestAuthorization(
-          () => resolve({ granted: true }),
-          (error) => resolve({ granted: false, error: error.message })
-        );
-      });
+        else {
+            // iOS - request permission through Geolocation
+            return new Promise((resolve) => {
+                Geolocation.requestAuthorization(() => resolve({ granted: true }), (error) => resolve({ granted: false, error: error.message }));
+            });
+        }
     }
-  } catch (error) {
-    return { granted: false, error: `Permission request failed: ${error}` };
-  }
+    catch (error) {
+        return { granted: false, error: `Permission request failed: ${error}` };
+    }
 };
 export const checkLocationPermission = async () => {
-  try {
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      );
-      return granted;
-    } else {
-      // For iOS, we'll check when we try to get location
-      return true;
+    try {
+        if (Platform.OS === 'android') {
+            const granted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            return granted;
+        }
+        else {
+            // For iOS, we'll check when we try to get location
+            return true;
+        }
     }
-  } catch (error) {
-    console.error('Error checking location permission:', error);
-    return false;
-  }
+    catch (error) {
+        console.error('Error checking location permission:', error);
+        return false;
+    }
 };

@@ -7,15 +7,12 @@ export { default as AddressVerificationField } from './components/AddressVerific
 export { ApiService } from './services/ApiService';
 export { LocationService } from './services/LocationService';
 // Export utilities
-export {
-  requestLocationPermission,
-  checkLocationPermission,
-} from './utils/permissions';
+export { requestLocationPermission, checkLocationPermission, } from './utils/permissions';
 // Convenience function to create the library
 export const createAddressVerification = (config) => {
-  return {
-    config,
-    ApiService: ApiService.getInstance(),
-    LocationService: LocationService.getInstance(),
-  };
+    return {
+        config,
+        ApiService: ApiService.getInstance(),
+        LocationService: LocationService.getInstance(),
+    };
 };
