@@ -1,41 +1,47 @@
-import { fixupConfigRules } from '@eslint/compat';
-import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
+import react from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
 import prettier from 'eslint-plugin-prettier';
 import { defineConfig } from 'eslint/config';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
 
 export default defineConfig([
+  js.configs.recommended,
   {
-    extends: fixupConfigRules(compat.extends('@react-native', 'prettier')),
-    plugins: { prettier },
+    plugins: {
+      react,
+      'react-hooks': reactHooks,
+      prettier,
+    },
+    ignores: [
+      '**/node_modules/**',
+      '**/.yarn/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/lib/**',
+      '**/example/**',
+    ],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
     rules: {
       'react/react-in-jsx-scope': 'off',
+      'react-hooks/exhaustive-deps': 'warn',
       'prettier/prettier': [
         'error',
         {
-          quoteProps: 'consistent',
           singleQuote: true,
-          tabWidth: 2,
           trailingComma: 'es5',
+          tabWidth: 2,
           useTabs: false,
+          semi: true,
         },
       ],
     },
-  },
-  {
-    ignores: [
-      'node_modules/',
-      'lib/'
-    ],
   },
 ]);

@@ -1,0 +1,15 @@
+# Ignore Yarn and build artifacts
+.yarn/
+node_modules/
+build/
+dist/
+
+# Ignore configuration files
+babel.config.js
+metro.config.js
+eslint.config.mjs
+yarn.lock
+example/
+
+# Ignore TypeScript build outputs
+*.d.ts

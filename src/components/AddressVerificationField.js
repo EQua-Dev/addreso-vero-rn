@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from 'react/jsx-runtime';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -9,11 +10,6 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import type {
-  AddressVerificationFieldProps,
-  GooglePlacesPrediction,
-  AddressResult,
-} from '../types';
 import { ApiService } from '../services/ApiService';
 import { LocationService } from '../services/LocationService';
 import { requestLocationPermission } from '../utils/permissions';
@@ -23,8 +19,7 @@ import {
   GOOGLE_PLACES_KEY,
 } from '../utils/helper_functions';
 import GooglePlacesService from '../services/GooglePlacesService';
-
-const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
+const AddressVerificationField = ({
   config,
   onAddressSelected,
   onLocationUpdate,
@@ -38,23 +33,20 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
   // googlePlacesApiKey, // Add this prop to pass the API key
 }) => {
   const [query, setQuery] = useState(config.initialAddressText || '');
-  const [suggestions, setSuggestions] = useState<GooglePlacesPrediction[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<AddressResult | null>(
-    null
-  );
-  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const [pollingInterval, setPollingInterval] = useState<number>(15);
-  const [sessionTimeout, setSessionTimeout] = useState<number>(60);
+  const [pollingInterval, setPollingInterval] = useState(15);
+  const [sessionTimeout, setSessionTimeout] = useState(60);
   const [sessionToken] = useState(() => generateSessionToken());
   const [googlePlacesService] = useState(
     () => new GooglePlacesService(GOOGLE_PLACES_KEY || '')
   );
-
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce(async (searchQuery: string) => {
+    debounce(async (searchQuery) => {
       if (searchQuery.trim().length > 2) {
         setLoadingSuggestions(true);
         try {
@@ -64,7 +56,6 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
               sessionToken
             );
           console.log('predictions', predictions);
-
           if (Array.isArray(predictions)) {
             setSuggestions(predictions);
           } else {
@@ -87,7 +78,6 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
     }, 300),
     [googlePlacesService, sessionToken, onError]
   );
-
   // Initialize API service and fetch config
   useEffect(() => {
     const initializeService = async () => {
@@ -96,9 +86,7 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
         // if (!googlePlacesApiKey) {
         //   throw new Error('Google Places API key is required');
         // }
-
         ApiService.getInstance().configure(config.apiKey, config.customerID);
-
         const configData =
           await ApiService.getInstance().fetchAddressVerificationConfig();
         setPollingInterval(configData.geotaggingPollingInterval || 15);
@@ -110,24 +98,20 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
         setLoading(false);
       }
     };
-
     initializeService();
   }, [config.apiKey, config.customerID, onError]);
-
   // Trigger search when query changes
   useEffect(() => {
     debouncedSearch(query);
   }, [query, debouncedSearch]);
-
   const handleSuggestionSelect = useCallback(
-    async (suggestion: GooglePlacesPrediction) => {
+    async (suggestion) => {
       try {
         setLoadingSuggestions(true);
         const placeDetails = await googlePlacesService.getPlaceDetails(
           suggestion.place_id,
           sessionToken
         );
-
         setSelectedAddress(placeDetails);
         setQuery(placeDetails.address);
         setSuggestions([]);
@@ -145,13 +129,11 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
     },
     [onAddressSelected, onError, googlePlacesService, sessionToken]
   );
-
   const handleSubmit = useCallback(async () => {
     if (!selectedAddress) {
       Alert.alert('Error', 'Please select an address first');
       return;
     }
-
     if (config.verifyLocation) {
       try {
         const permissionResult = await requestLocationPermission();
@@ -162,7 +144,6 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
           );
           return;
         }
-
         // Start location tracking
         const locationService = LocationService.getInstance();
         locationService.startLocationTracking(
@@ -170,7 +151,6 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
           config.locationFetchDurationSeconds || sessionTimeout,
           onLocationUpdate
         );
-
         Alert.alert(
           'Success',
           'Address verification started. Location tracking is now active.'
@@ -190,132 +170,151 @@ const AddressVerificationField: React.FC<AddressVerificationFieldProps> = ({
     onLocationUpdate,
     onError,
   ]);
-
   const handleClearAddress = useCallback(() => {
     setSelectedAddress(null);
     setQuery('');
     setSuggestions([]);
   }, []);
-
   if (loading) {
-    return (
-      <View style={[styles.container, style]}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.loadingText}>Loading configuration...</Text>
-      </View>
-    );
+    return _jsxs(View, {
+      style: [styles.container, style],
+      children: [
+        _jsx(ActivityIndicator, { size: 'large', color: '#0000ff' }),
+        _jsx(Text, {
+          style: styles.loadingText,
+          children: 'Loading configuration...',
+        }),
+      ],
+    });
   }
-
-  return (
-    <View style={[styles.container, style]}>
-      <View style={styles.inputContainer}>
-        {chooseAddressType && addressTypes?.length! > 0 && (
-          <View style={styles.addressTypeContainer}>
-            {addressTypes!.map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.addressTypeButton,
-                  selectedType === type && styles.addressTypeButtonSelected,
-                ]}
-                onPress={() => {
-                  setSelectedType(type);
-                  onAddressTypeChange?.(type);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.addressTypeText,
-                    selectedType === type && styles.addressTypeTextSelected,
-                  ]}
-                >
-                  {type}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        <TextInput
-          style={styles.textInput}
-          value={query}
-          onChangeText={setQuery}
-          placeholder={placeholder}
-          placeholderTextColor="#999"
-          autoComplete="street-address"
-          autoCorrect={false}
-          keyboardAppearance="light"
-        />
-        {selectedAddress && (
-          <TouchableOpacity
-            style={styles.clearButton}
-            onPress={handleClearAddress}
-          >
-            <Text style={styles.clearButtonText}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {loadingSuggestions && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color="#0000ff" />
-        </View>
-      )}
-
-      {suggestions.length > 0 && (
-        <FlatList
-          data={suggestions}
-          keyExtractor={(item) => item.place_id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.suggestionItem}
-              onPress={() => handleSuggestionSelect(item)}
-            >
-              <Text style={styles.suggestionMain}>
-                {item.structured_formatting.main_text}
-              </Text>
-              <Text style={styles.suggestionSecondary}>
-                {item.structured_formatting.secondary_text}
-              </Text>
-            </TouchableOpacity>
-          )}
-          style={styles.suggestionsList}
-          nestedScrollEnabled
-          keyboardShouldPersistTaps="handled"
-        />
-      )}
-
-      {showSubmitButton && (
-        <TouchableOpacity
-          style={[
+  return _jsxs(View, {
+    style: [styles.container, style],
+    children: [
+      _jsxs(View, {
+        style: styles.inputContainer,
+        children: [
+          chooseAddressType &&
+            addressTypes?.length > 0 &&
+            _jsx(View, {
+              style: styles.addressTypeContainer,
+              children: addressTypes.map((type) =>
+                _jsx(
+                  TouchableOpacity,
+                  {
+                    style: [
+                      styles.addressTypeButton,
+                      selectedType === type && styles.addressTypeButtonSelected,
+                    ],
+                    onPress: () => {
+                      setSelectedType(type);
+                      onAddressTypeChange?.(type);
+                    },
+                    children: _jsx(Text, {
+                      style: [
+                        styles.addressTypeText,
+                        selectedType === type && styles.addressTypeTextSelected,
+                      ],
+                      children: type,
+                    }),
+                  },
+                  type
+                )
+              ),
+            }),
+          _jsx(TextInput, {
+            style: styles.textInput,
+            value: query,
+            onChangeText: setQuery,
+            placeholder: placeholder,
+            placeholderTextColor: '#999',
+            autoComplete: 'street-address',
+            autoCorrect: false,
+            keyboardAppearance: 'light',
+          }),
+          selectedAddress &&
+            _jsx(TouchableOpacity, {
+              style: styles.clearButton,
+              onPress: handleClearAddress,
+              children: _jsx(Text, {
+                style: styles.clearButtonText,
+                children: '\u2715',
+              }),
+            }),
+        ],
+      }),
+      loadingSuggestions &&
+        _jsx(View, {
+          style: styles.loadingContainer,
+          children: _jsx(ActivityIndicator, {
+            size: 'small',
+            color: '#0000ff',
+          }),
+        }),
+      suggestions.length > 0 &&
+        _jsx(FlatList, {
+          data: suggestions,
+          keyExtractor: (item) => item.place_id,
+          renderItem: ({ item }) =>
+            _jsxs(TouchableOpacity, {
+              style: styles.suggestionItem,
+              onPress: () => handleSuggestionSelect(item),
+              children: [
+                _jsx(Text, {
+                  style: styles.suggestionMain,
+                  children: item.structured_formatting.main_text,
+                }),
+                _jsx(Text, {
+                  style: styles.suggestionSecondary,
+                  children: item.structured_formatting.secondary_text,
+                }),
+              ],
+            }),
+          style: styles.suggestionsList,
+          nestedScrollEnabled: true,
+          keyboardShouldPersistTaps: 'handled',
+        }),
+      showSubmitButton &&
+        _jsx(TouchableOpacity, {
+          style: [
             styles.submitButton,
             !selectedAddress && styles.submitButtonDisabled,
-          ]}
-          onPress={handleSubmit}
-          disabled={!selectedAddress}
-        >
-          <Text style={styles.submitButtonText}>
-            {config.verifyLocation ? 'Verify Address' : 'Submit Address'}
-          </Text>
-        </TouchableOpacity>
-      )}
-
-      {selectedAddress && (
-        <View style={styles.selectedAddressContainer}>
-          <Text style={styles.selectedAddressLabel}>Selected Address:</Text>
-          <Text style={styles.selectedAddressText}>
-            {selectedAddress.address}
-          </Text>
-          <Text style={styles.coordinatesText}>
-            Coordinates: {selectedAddress.latitude.toFixed(6)},{' '}
-            {selectedAddress.longitude.toFixed(6)}
-          </Text>
-        </View>
-      )}
-    </View>
-  );
+          ],
+          onPress: handleSubmit,
+          disabled: !selectedAddress,
+          children: _jsx(Text, {
+            style: styles.submitButtonText,
+            children: config.verifyLocation
+              ? 'Verify Address'
+              : 'Submit Address',
+          }),
+        }),
+      selectedAddress &&
+        _jsxs(View, {
+          style: styles.selectedAddressContainer,
+          children: [
+            _jsx(Text, {
+              style: styles.selectedAddressLabel,
+              children: 'Selected Address:',
+            }),
+            _jsx(Text, {
+              style: styles.selectedAddressText,
+              children: selectedAddress.address,
+            }),
+            _jsxs(Text, {
+              style: styles.coordinatesText,
+              children: [
+                'Coordinates: ',
+                selectedAddress.latitude.toFixed(6),
+                ',',
+                ' ',
+                selectedAddress.longitude.toFixed(6),
+              ],
+            }),
+          ],
+        }),
+    ],
+  });
 };
-
 const styles = StyleSheet.create({
   container: {
     padding: 16,
@@ -447,5 +446,4 @@ const styles = StyleSheet.create({
     color: '#666',
   },
 });
-
 export default AddressVerificationField;

@@ -1,22 +1,14 @@
-import type { AddressResult, GooglePlacesPrediction } from '../types';
 import { GOOGLE_PLACES_BASE_URL } from '../utils/helper_functions';
-
 // Google Places API service
 class GooglePlacesService {
-  private apiKey: string;
-
-  constructor(apiKey: string) {
+  apiKey;
+  constructor(apiKey) {
     this.apiKey = apiKey;
   }
-
-  async getAutocompletePredictions(
-    input: string,
-    sessionToken?: string
-  ): Promise<GooglePlacesPrediction[]> {
+  async getAutocompletePredictions(input, sessionToken) {
     if (!this.apiKey) {
       throw new Error('Google Places API key is required');
     }
-
     try {
       const params = new URLSearchParams({
         input: input.trim(),
@@ -25,7 +17,6 @@ class GooglePlacesService {
         language: 'en',
         ...(sessionToken && { sessiontoken: sessionToken }),
       });
-
       const response = await fetch(
         `${GOOGLE_PLACES_BASE_URL}/autocomplete/json?${params}`,
         {
@@ -35,15 +26,12 @@ class GooglePlacesService {
           },
         }
       );
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
-
       if (data.status === 'OK') {
-        return data.predictions.map((prediction: any) => ({
+        return data.predictions.map((prediction) => ({
           description: prediction.description,
           place_id: prediction.place_id,
           structured_formatting: {
@@ -66,15 +54,10 @@ class GooglePlacesService {
       throw error;
     }
   }
-
-  async getPlaceDetails(
-    placeId: string,
-    sessionToken?: string
-  ): Promise<AddressResult> {
+  async getPlaceDetails(placeId, sessionToken) {
     if (!this.apiKey) {
       throw new Error('Google Places API key is required');
     }
-
     try {
       const params = new URLSearchParams({
         place_id: placeId,
@@ -83,7 +66,6 @@ class GooglePlacesService {
         language: 'en',
         ...(sessionToken && { sessiontoken: sessionToken }),
       });
-
       const response = await fetch(
         `${GOOGLE_PLACES_BASE_URL}/details/json?${params}`,
         {
@@ -93,13 +75,10 @@ class GooglePlacesService {
           },
         }
       );
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
-
       if (data.status === 'OK') {
         const place = data.result;
         return {
@@ -120,5 +99,4 @@ class GooglePlacesService {
     }
   }
 }
-
 export default GooglePlacesService;

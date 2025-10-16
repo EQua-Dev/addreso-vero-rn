@@ -6,38 +6,40 @@ export interface PermissionResult {
   error?: string;
 }
 
-export const requestLocationPermission = async (): Promise<PermissionResult> => {
-  try {
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Permission',
-          message: 'This app needs access to location for address verification.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        }
-      );
-      
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        return { granted: true };
-      } else {
-        return { granted: false, error: 'Location permission denied' };
-      }
-    } else {
-      // iOS - request permission through Geolocation
-      return new Promise((resolve) => {
-        Geolocation.requestAuthorization(
-          () => resolve({ granted: true }),
-          (error) => resolve({ granted: false, error: error.message })
+export const requestLocationPermission =
+  async (): Promise<PermissionResult> => {
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message:
+              'This app needs access to location for address verification.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          }
         );
-      });
+
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          return { granted: true };
+        } else {
+          return { granted: false, error: 'Location permission denied' };
+        }
+      } else {
+        // iOS - request permission through Geolocation
+        return new Promise((resolve) => {
+          Geolocation.requestAuthorization(
+            () => resolve({ granted: true }),
+            (error) => resolve({ granted: false, error: error.message })
+          );
+        });
+      }
+    } catch (error) {
+      return { granted: false, error: `Permission request failed: ${error}` };
     }
-  } catch (error) {
-    return { granted: false, error: `Permission request failed: ${error}` };
-  }
-};
+  };
 
 export const checkLocationPermission = async (): Promise<boolean> => {
   try {

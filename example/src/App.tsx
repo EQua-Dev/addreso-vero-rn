@@ -22,7 +22,9 @@ const App = () => {
   // Form state
   const [email, setEmail] = useState('demo@email.com');
   const [customerID, setCustomerID] = useState('68515eff6387fbcc00298a20');
-  const [apiKey, setApiKey] = useState('sk_rd_v1_ChoPcUQjtI9pMTivjYJ9hKXop0WeXO');
+  const [apiKey, setApiKey] = useState(
+    'sk_rd_v1_ChoPcUQjtI9pMTivjYJ9hKXop0WeXO'
+  );
   const [name, setName] = useState('John Doe');
   const [allowVerification, setAllowVerification] = useState(true);
   const [showField, setShowField] = useState(false);
@@ -59,13 +61,16 @@ const App = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentInsetAdjustmentBehavior="automatic" style={styles.scrollView}>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        style={styles.scrollView}
+      >
         <View style={styles.content}>
           {/* Logo placeholder */}
           <View style={styles.logoContainer}>
             <Text style={styles.logoText}>SourceID</Text>
           </View>
-          
+
           <Text style={styles.title}>Address Verification Demo</Text>
 
           {/* Form fields */}
@@ -114,7 +119,10 @@ const App = () => {
             </View>
 
             {/* Integrate button */}
-            <TouchableOpacity style={styles.integrateButton} onPress={handleIntegrate}>
+            <TouchableOpacity
+              style={styles.integrateButton}
+              onPress={handleIntegrate}
+            >
               <Text style={styles.integrateButtonText}>Integrate</Text>
             </TouchableOpacity>
           </View>

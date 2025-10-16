@@ -1,6 +1,6 @@
 {
   "name": "sid-address-verification-react-native",
-  "version": "0.4.5",
+  "version": "0.5.6",
   "description": "A sourceID react native package for address verification",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
@@ -66,7 +66,7 @@
     "@commitlint/config-conventional": "^19.6.0",
     "@eslint/compat": "^1.2.7",
     "@eslint/eslintrc": "^3.3.0",
-    "@eslint/js": "^9.22.0",
+    "@eslint/js": "^9.37.0",
     "@evilmartians/lefthook": "^1.5.0",
     "@react-native/babel-preset": "0.78.2",
     "@react-native/eslint-config": "^0.78.0",
@@ -76,11 +76,13 @@
     "arktype": "2.1.0",
     "commitlint": "^19.6.1",
     "del-cli": "^5.1.0",
-    "eslint": "^9.22.0",
+    "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.1",
-    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.0",
     "jest": "^29.7.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.6.2",
     "react": "19.0.0",
     "react-native": "0.79.4",
     "react-native-builder-bob": "0.23.2",
@@ -151,7 +153,8 @@
     "version": "0.51.1"
   },
   "dependencies": {
-    "@react-native-community/geolocation": "^3.4.0"
+    "@react-native-community/geolocation": "^3.4.0",
+    "react-native-dotenv": "^3.4.11"
   },
   "type": "module"
 }
